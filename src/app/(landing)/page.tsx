@@ -42,7 +42,7 @@ const Page = () => {
             </div>
 
             <p className="text-base/7 text-gray-600 max-w-prose text-center text-pretty">
-              PingPanda is the easiest way to monitor your SaaS. Get instant
+              PingDora is the easiest way to monitor your SaaS. Get instant
               notifications for{" "}
               <span className="font-semibold text-gray-700">
                 sales, new users, or any other event
