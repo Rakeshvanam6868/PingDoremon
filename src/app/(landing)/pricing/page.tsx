@@ -1,41 +1,83 @@
 "use client"
-
 import { Heading } from "@/components/heading"
 import { MaxWidthWrapper } from "@/components/max-width-wrapper"
 import { Button } from "@/components/ui/button"
-import { client } from "@/lib/client"
-import { createCheckoutSession } from "@/lib/stripe"
-import { useUser } from "@clerk/nextjs"
-import { useMutation } from "@tanstack/react-query"
-import { CheckIcon } from "lucide-react"
 import { useRouter } from "next/navigation"
+import { useUser } from "@clerk/nextjs"
+import { useState } from "react"
+import { CheckIcon } from "lucide-react"
 
-const Page = () => {
+export default function PricingPage() {
   const { user } = useUser()
   const router = useRouter()
+  const [isLoading, setIsLoading] = useState(false);
+
+ const userEmail = user?.emailAddresses[0]?.emailAddress || ""
+  const userName = user?.fullName || ""
 
   const INCLUDED_FEATURES = [
-    "10.000 real-time events per month",
+    "10,000 real-time events per month",
     "10 event categories",
     "Advanced analytics and insights",
     "Priority support",
   ]
 
-  const { mutate: createCheckoutSession } = useMutation({
-    mutationFn: async () => {
-      const res = await client.payment.createCheckoutSession.$post()
-      return await res.json()
-    },
-    onSuccess: ({ url }) => {
-      if (url) router.push(url)
-    },
-  })
-
-  const handleGetAccess = () => {
-    if (user) {
-      createCheckoutSession()
-    } else {
+  const handlePayment = async () => {
+    if (!user) {
       router.push("/sign-in?intent=upgrade")
+      return
+    }
+
+    setIsLoading(true)
+
+    try {
+      // Step 1: Create Razorpay Order
+      const res = await fetch('/api/payment/create-razorpay-session', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          userId: user.id,
+          userEmail: userEmail
+        }),
+      })
+
+      const data = await res.json()
+      
+      if (!data.orderId) {
+        throw new Error('Failed to create Razorpay order')
+      }
+
+      // Step 2: Open Razorpay Checkout
+      const options = {
+        key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
+        amount: '100000', // ₹1000 in paise
+        currency: 'INR',
+        name: 'PingDora',
+        description: 'Lifetime Access',
+        order_id: data.orderId,
+        handler: async function (response: any) {
+          // Step 3: Handle Success (No webhook verification)
+          console.log('Payment successful!', response)
+          alert('Payment successful!')
+          router.push('/dashboard?success=true')
+        },
+        prefill: {
+          name: user.fullName || '',
+          email: userEmail || '',
+          contact: ''
+        },
+        theme: {
+          color: '#00a6ff'
+        }
+      }
+
+      const rzp = new (window as any).Razorpay(options)
+      rzp.open()
+    } catch (error) {
+      console.error('Payment failed:', error)
+      alert('Payment failed. Please try again.')
+    } finally {
+      setIsLoading(false)
     }
   }
 
@@ -57,7 +99,7 @@ const Page = () => {
             </h3>
 
             <p className="mt-6 text-base/7 text-gray-600">
-              Invest once in PingPanda and transform how you monitor your SaaS
+              Invest once in PingDora and transform how you monitor your SaaS
               forever. Get instant alerts, track critical metrics and never miss
               a beat in your business growth.
             </p>
@@ -86,16 +128,21 @@ const Page = () => {
                 </p>
                 <p className="mt-6 flex items-baseline justify-center gap-x-2">
                   <span className="text-5xl font-bold tracking-tight text-gray-900">
-                    $49
+                    ₹1000
                   </span>
                   <span className="text-sm font-semibold leading-6 tracking-wide text-gray-600">
-                    USD
+                    INR
                   </span>
                 </p>
 
-                <Button onClick={handleGetAccess} className="mt-6 px-20">
-                  Get PingPanda
+                <Button 
+                  onClick={handlePayment} 
+                  className="mt-6 px-20"
+                  disabled={isLoading}
+                >
+                  {isLoading ? 'Processing...' : 'Get PingDora'}
                 </Button>
+
                 <p className="mt-6 text-xs leading-5 text-gray-600">
                   Secure payment. Start monitoring in minutes.
                 </p>
@@ -107,5 +154,3 @@ const Page = () => {
     </div>
   )
 }
-
-export default Page
