@@ -15,7 +15,8 @@ const eb_garamond = EB_Garamond({
 
 export const metadata: Metadata = {
   title: "pingDora",
-  description: "Created using jStack",
+  description: "Created by @pingdora",
+  keywords: ["pingdora", "ping", "dora", "events", "monitoring"],
   icons: [{ rel: "icon", url: "/favicon.ico" }],
 }
 
