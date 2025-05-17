@@ -1,8 +1,7 @@
 "use client"
-
 import { Card } from "@/components/ui/card"
 import { client } from "@/lib/client"
-import { Plan } from "@prisma/client"
+import { Plan } from "@prisma/client" // Now valid
 import { useMutation, useQuery } from "@tanstack/react-query"
 import { format } from "date-fns"
 import { BarChart } from "lucide-react"
