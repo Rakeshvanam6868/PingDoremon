@@ -1,0 +1,16 @@
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "next.config.js",
+      "use": "@vercel/next"
+    }
+  ],
+  "build": {
+    "environment": {
+      "ENABLE_PNPM_INSTALL_FLAGS": "--no-frozen-lockfile"
+    }
+  },
+  "devCommand": "pnpm dev",
+  "installCommand": "pnpm install --frozen-lockfile"
+}
