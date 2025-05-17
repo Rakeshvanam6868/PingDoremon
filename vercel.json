@@ -7,10 +7,8 @@
     }
   ],
   "build": {
-    "environment": {
-      "ENABLE_PNPM_INSTALL_FLAGS": "--no-frozen-lockfile"
-    }
+    "command": "pnpm install --no-frozen-lockfile && pnpm run build"
   },
   "devCommand": "pnpm dev",
-  "installCommand": "pnpm install --frozen-lockfile"
+  "installCommand": "pnpm install --no-frozen-lockfile"
 }
